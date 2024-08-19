@@ -5,11 +5,7 @@ using MicroRabbit.Domain.Core.Events;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MicroRabbit.Infra.Bus
 {
@@ -103,7 +99,7 @@ namespace MicroRabbit.Infra.Bus
             {
                 await ProcessEvent(eventName, message).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
@@ -118,7 +114,11 @@ namespace MicroRabbit.Infra.Bus
                 foreach (var subscripton in subscriptions)
                 {
                     var handler = Activator.CreateInstance(subscripton);
-                    if (handler == null) continue;
+                    if (handler == null)
+                    {
+                        continue;
+                    }
+
                     var eventType = _eventTypes.SingleOrDefault(t => t.Name == eventName);
                     var @event = JsonConvert.DeserializeObject(message, eventType);
                     var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
